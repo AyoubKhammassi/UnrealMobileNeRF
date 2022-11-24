@@ -25,7 +25,7 @@ You can read more about MobileNeRF in their official page: [MobileNeRF: Exploiti
 
 * The plugin then starts creating/importing all the necessary assets. You should end up with a new folder under *Content/MobileNeRFScenes/*. Check the details section for the full list of the assets that you'll find under that folder. The most important asset is a StaticMesh with the name **SceneNameCombined**, which you can drag and drop into your level.
 
-![How To Import](Resources/How_to.gif)
+![How To Import](Resources/how_to.gif)
 
 ## Pre-Trained Scenes
 You can train your own MobileNeRF scenes following the [official Github repository](https://github.com/google-research/jax3d/tree/main/jax3d/projects/mobilenerf).
