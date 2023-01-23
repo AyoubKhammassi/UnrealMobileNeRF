@@ -18,9 +18,10 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 	
-	void AddMobileNerfMenu(FToolBarBuilder& Builder);
+	void AddMobileNerfMenu(FMenuBarBuilder& Builder);
 	
 	TSharedRef<SWidget> FillComboButton(TSharedPtr<class FUICommandList> Commands);
+	void FillPulldownMenu(FMenuBuilder& Builder);
 
 	void ImportMobileNerfFromDisk(bool bIsForwardFacing);
 	bool TryImportMobileNerf(FString InPath, bool bIsForwardFacing, bool bOptimize, FString& OutMessage);

@@ -180,16 +180,14 @@ void FMobileNerfModule::ShutdownModule()
 	FMobileNerfCommands::Unregister();
 }
 
-void FMobileNerfModule::AddMobileNerfMenu(FToolBarBuilder& Builder)
+void FMobileNerfModule::AddMobileNerfMenu(FMenuBarBuilder& Builder)
 {
-	FUIAction TempCompileOptionsCommand;
-	Builder.AddComboButton(
-		TempCompileOptionsCommand,
-		FOnGetContent::CreateRaw(this, &FMobileNerfModule::FillComboButton, PluginCommands),
-		LOCTEXT("MobileNerf", "MobileNerf"),
-		LOCTEXT("MobileNerf Plugin", "MobileNerf Plugin Menu"),
-		TAttribute<FSlateIcon>(),
-		false
+	Builder.AddPullDownMenu(
+		FText::FromString("MobileNeRF"),
+		FText::FromString("MobileNerf Plugin Menu"),
+		FNewMenuDelegate::CreateRaw(this, &FMobileNerfModule::FillPulldownMenu),
+		"MobileNeRF",
+		FName(TEXT("MobileNerf Plugin Menu"))
 	);
 }
 
@@ -201,6 +199,15 @@ TSharedRef<SWidget> FMobileNerfModule::FillComboButton(TSharedPtr<class FUIComma
 	MenuBuilder.AddMenuEntry(FMobileNerfCommands::Get().ImportForwardFacing);
 
 	return MenuBuilder.MakeWidget();
+}
+
+void FMobileNerfModule::FillPulldownMenu(FMenuBuilder& Builder)
+{   
+	Builder.BeginSection("Import Section", FText::FromString("Import MobileNeRF"));
+	Builder.AddMenuEntry(FMobileNerfCommands::Get().Import360);
+	Builder.AddMenuEntry(FMobileNerfCommands::Get().ImportForwardFacing);
+	Builder.AddMenuSeparator(FName("Section_1"));
+	Builder.EndSection();
 }
 
 
@@ -502,8 +509,10 @@ bool FMobileNerfModule::TryImportMobileNerf(FString InPath, bool bIsForwardFacin
 		Texture->CompressionSettings = TextureCompressionSettings::TC_VectorDisplacementmap;
 		Texture->CompressionNone = 1;
 		Texture->PostEditChange();
-		NewMobileNerfAsset->Textures.Add(Texture);
+		NewMobileNerfAsset->Textures.AddUnique(Texture);
 	}
+
+	UE_LOG(LogTemp, Log, TEXT("Imported %d PNG files"), NewMobileNerfAsset->Textures.Num());
 
 
 	//Make a copy of the template material from the plugin folder
@@ -517,7 +526,7 @@ bool FMobileNerfModule::TryImportMobileNerf(FString InPath, bool bIsForwardFacin
 
 	//Find the custom node
 	UMaterialExpressionCustom* CustomNodeExp = NULL;
-	for (auto ExpressionPtr : MaterialBase->Expressions)
+	for (auto ExpressionPtr : MaterialBase->GetEditorOnlyData()->ExpressionCollection.Expressions)
 	{
 		if (ExpressionPtr->IsA(UMaterialExpressionCustom::StaticClass()))
 		{
@@ -595,7 +604,7 @@ bool FMobileNerfModule::TryImportMobileNerf(FString InPath, bool bIsForwardFacin
 		ActorsToMerge[i]->FindComponentByClass<UStaticMeshComponent>()->SetStaticMesh(NewMobileNerfAsset->Meshes[i]);
 	}
 
-	FEditorScriptingMergeStaticMeshActorsOptions MergeOptions;
+	FMergeStaticMeshActorsOptions MergeOptions;
 	MergeOptions.MeshMergingSettings.bMergeEquivalentMaterials = 1;
 	MergeOptions.bDestroySourceActors = true;
 	MergeOptions.bSpawnMergedActor = true;
@@ -621,12 +630,13 @@ void FMobileNerfModule::RegisterMenus()
 
 	{
 		TSharedPtr<FExtender> NewToolbarExtender = MakeShareable(new FExtender);
-		NewToolbarExtender->AddToolBarExtension("Settings",
+		NewToolbarExtender->AddMenuBarExtension("Build",
 			EExtensionHook::After,
 			PluginCommands,
-			FToolBarExtensionDelegate::CreateRaw(this, &FMobileNerfModule::AddMobileNerfMenu));
+			FMenuBarExtensionDelegate::CreateRaw(this, &FMobileNerfModule::AddMobileNerfMenu));
 
-		LevelEditorModule.GetToolBarExtensibilityManager()->AddExtender(NewToolbarExtender);
+
+		LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(NewToolbarExtender);
 	}
 }
 
