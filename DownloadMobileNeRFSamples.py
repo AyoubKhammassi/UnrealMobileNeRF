@@ -4,7 +4,7 @@ import wget
 import json
 import argparse
 
-scene_list = ["chair", "drums", "ficus", "hotdog", "lego", "materials", "mic", "ship", "bicycle", "gardenvas", "stump"] #360 scene
+scene_list = ["chair", "drums", "ficus", "hotdog", "lego", "materials", "mic", "ship", "bicycle", "gardenvase", "stump"] #360 scene
 ff_scene_list = ["fern", "flower", "fortress", "horns", "leaves", "orchids", "room", "trex"] #Forward-Facing  
 
 
